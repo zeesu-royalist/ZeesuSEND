@@ -3,7 +3,7 @@
 -- ================================================================
 
 -- 1. Create Transfers Table
-CREATE TABLE IF NOT EXISTS transfers (
+CREATE TABLE IF NOT EXISTS public.transfers (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     transfer_key TEXT UNIQUE NOT NULL,
     status TEXT NOT NULL DEFAULT 'active',
@@ -14,9 +14,9 @@ CREATE TABLE IF NOT EXISTS transfers (
 );
 
 -- 2. Create Transfer Items Table
-CREATE TABLE IF NOT EXISTS transfer_items (
+CREATE TABLE IF NOT EXISTS public.transfer_items (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    transfer_id UUID NOT NULL REFERENCES transfers(id) ON DELETE CASCADE,
+    transfer_id UUID NOT NULL REFERENCES public.transfers(id) ON DELETE CASCADE,
     type TEXT NOT NULL CHECK (type IN ('file', 'image', 'text')),
     file_name TEXT NULL,
     file_path TEXT NULL,
@@ -27,13 +27,13 @@ CREATE TABLE IF NOT EXISTS transfer_items (
 );
 
 -- 3. Create Indexes for High Performance Key Lookups & Expiration Cleaning
-CREATE INDEX IF NOT EXISTS idx_transfers_key ON transfers(transfer_key);
-CREATE INDEX IF NOT EXISTS idx_transfers_expires_at ON transfers(expires_at);
-CREATE INDEX IF NOT EXISTS idx_transfers_status ON transfers(status);
-CREATE INDEX IF NOT EXISTS idx_transfer_items_transfer_id ON transfer_items(transfer_id);
+CREATE INDEX IF NOT EXISTS idx_transfers_key ON public.transfers(transfer_key);
+CREATE INDEX IF NOT EXISTS idx_transfers_expires_at ON public.transfers(expires_at);
+CREATE INDEX IF NOT EXISTS idx_transfers_status ON public.transfers(status);
+CREATE INDEX IF NOT EXISTS idx_transfer_items_transfer_id ON public.transfer_items(transfer_id);
 
 -- 4. Atomic Download Count Increment Function (Prevents Race Conditions)
-CREATE OR REPLACE FUNCTION increment_transfer_download_count(p_transfer_id UUID)
+CREATE OR REPLACE FUNCTION public.increment_transfer_download_count(p_transfer_id UUID)
 RETURNS TABLE (
     success BOOLEAN,
     current_count INTEGER,
@@ -46,10 +46,9 @@ DECLARE
     v_expires_at TIMESTAMPTZ;
     v_status TEXT;
 BEGIN
-    -- Lock record for update
     SELECT download_count, download_limit, expires_at, status 
     INTO v_download_count, v_download_limit, v_expires_at, v_status
-    FROM transfers
+    FROM public.transfers
     WHERE id = p_transfer_id
     FOR UPDATE;
 
@@ -58,30 +57,26 @@ BEGIN
         RETURN;
     END IF;
 
-    -- Check if transfer expired
     IF v_expires_at IS NOT NULL AND v_expires_at <= NOW() THEN
-        UPDATE transfers SET status = 'expired' WHERE id = p_transfer_id;
+        UPDATE public.transfers SET status = 'expired' WHERE id = p_transfer_id;
         RETURN QUERY SELECT FALSE, v_download_count, v_download_limit, 'Transfer has expired';
         RETURN;
     END IF;
 
-    -- Check download limit
     IF v_download_limit IS NOT NULL AND v_download_count >= v_download_limit THEN
-        UPDATE transfers SET status = 'download_limit_reached' WHERE id = p_transfer_id;
+        UPDATE public.transfers SET status = 'download_limit_reached' WHERE id = p_transfer_id;
         RETURN QUERY SELECT FALSE, v_download_count, v_download_limit, 'Download limit reached';
         RETURN;
     END IF;
 
-    -- Increment count
     v_download_count := v_download_count + 1;
 
-    -- Update download count & status if limit hit
     IF v_download_limit IS NOT NULL AND v_download_count >= v_download_limit THEN
-        UPDATE transfers 
+        UPDATE public.transfers 
         SET download_count = v_download_count, status = 'download_limit_reached' 
         WHERE id = p_transfer_id;
     ELSE
-        UPDATE transfers 
+        UPDATE public.transfers 
         SET download_count = v_download_count 
         WHERE id = p_transfer_id;
     END IF;
@@ -90,27 +85,27 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 5. Row Level Security (RLS) Setup
-ALTER TABLE transfers ENABLE ROW LEVEL SECURITY;
-ALTER TABLE transfer_items ENABLE ROW LEVEL SECURITY;
+-- 5. Row Level Security Policies for Anonymous Sharing
+ALTER TABLE public.transfers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.transfer_items ENABLE ROW LEVEL SECURITY;
 
--- Since all client operations (creation, key lookup, signed URL downloads) 
--- are handled strictly server-side using the Service Role Key, direct public access is blocked.
-CREATE POLICY "Deny public direct insert/update/delete on transfers"
-    ON transfers FOR ALL
-    USING (false);
+-- Allow public anonymous transfers insert, select, update
+DROP POLICY IF EXISTS "Allow public insert on transfers" ON public.transfers;
+CREATE POLICY "Allow public insert on transfers" ON public.transfers FOR INSERT WITH CHECK (true);
 
-CREATE POLICY "Deny public direct insert/update/delete on transfer_items"
-    ON transfer_items FOR ALL
-    USING (false);
+DROP POLICY IF EXISTS "Allow public select on transfers" ON public.transfers;
+CREATE POLICY "Allow public select on transfers" ON public.transfers FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow public update on transfers" ON public.transfers;
+CREATE POLICY "Allow public update on transfers" ON public.transfers FOR UPDATE USING (true);
+
+DROP POLICY IF EXISTS "Allow public insert on transfer_items" ON public.transfer_items;
+CREATE POLICY "Allow public insert on transfer_items" ON public.transfer_items FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow public select on transfer_items" ON public.transfer_items;
+CREATE POLICY "Allow public select on transfer_items" ON public.transfer_items FOR SELECT USING (true);
 
 -- 6. Private Supabase Storage Bucket Setup Script
--- Execute in Supabase SQL Editor if storage bucket creation is desired via SQL:
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('transfers', 'transfers', false)
 ON CONFLICT (id) DO NOTHING;
-
--- Lock storage bucket access to service role only
-CREATE POLICY "Private access to transfers bucket"
-    ON storage.objects FOR ALL
-    USING (bucket_id = 'transfers' AND auth.role() = 'service_role');

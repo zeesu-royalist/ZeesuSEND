@@ -88,12 +88,16 @@ export async function POST(req: Request) {
 
       if (checkError) {
         console.error('Error checking transfer_key uniqueness:', checkError);
-        // If table doesn't exist yet, return clear error instruction
-        if (checkError.code === '42P01' || checkError.message.includes('relation "transfers" does not exist')) {
+        if (
+          checkError.code === 'PGRST205' ||
+          checkError.code === '42P01' ||
+          checkError.message.includes("Could not find the table 'public.transfers'") ||
+          checkError.message.includes('relation "transfers" does not exist')
+        ) {
           return NextResponse.json(
             {
               error:
-                'Database table "transfers" does not exist yet in Supabase. Please run the SQL migration script (supabase/migrations/20260809000000_create_transfers_schema.sql) in your Supabase SQL Editor.',
+                'Table "public.transfers" was not found in project "nuscmkmukautghlgdcaa". Please run the SQL migration query in your Supabase SQL Editor and run `NOTIFY pgrst, \'reload schema\';`.',
             },
             { status: 500 }
           );
@@ -127,11 +131,16 @@ export async function POST(req: Request) {
     if (transferError || !transferRecord) {
       console.error('Database transfer creation error:', transferError);
       const detail = transferError?.message || transferError?.details || 'Unknown database error';
-      if (detail.includes('relation "transfers" does not exist') || transferError?.code === '42P01') {
+      if (
+        transferError?.code === 'PGRST205' ||
+        transferError?.code === '42P01' ||
+        detail.includes("Could not find the table 'public.transfers'") ||
+        detail.includes('relation "transfers" does not exist')
+      ) {
         return NextResponse.json(
           {
             error:
-              'Database table "transfers" does not exist yet. Please run the SQL migration script in your Supabase SQL Editor.',
+              'Table "public.transfers" is not in Supabase schema cache. Please run the SQL query in Supabase SQL Editor and run: NOTIFY pgrst, \'reload schema\';',
           },
           { status: 500 }
         );
@@ -170,7 +179,7 @@ export async function POST(req: Request) {
           console.error('Failed to create signed upload URL:', signedUploadError);
           // Rollback transfer row
           await supabaseAdmin.from('transfers').delete().eq('id', transferId);
-          
+
           const storageDetail = signedUploadError?.message || 'Storage bucket error';
           if (storageDetail.includes('Bucket not found') || storageDetail.includes('not_found')) {
             return NextResponse.json(
