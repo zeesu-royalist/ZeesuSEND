@@ -85,11 +85,10 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 5. Row Level Security Policies for Anonymous Sharing
+-- 5. Row Level Security Policies for Anonymous Sharing (PostgreSQL Tables)
 ALTER TABLE public.transfers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.transfer_items ENABLE ROW LEVEL SECURITY;
 
--- Allow public anonymous transfers insert, select, update
 DROP POLICY IF EXISTS "Allow public insert on transfers" ON public.transfers;
 CREATE POLICY "Allow public insert on transfers" ON public.transfers FOR INSERT WITH CHECK (true);
 
@@ -105,7 +104,22 @@ CREATE POLICY "Allow public insert on transfer_items" ON public.transfer_items F
 DROP POLICY IF EXISTS "Allow public select on transfer_items" ON public.transfer_items;
 CREATE POLICY "Allow public select on transfer_items" ON public.transfer_items FOR SELECT USING (true);
 
--- 6. Private Supabase Storage Bucket Setup Script
+-- 6. Supabase Storage Bucket & Storage Object RLS Policies
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('transfers', 'transfers', false)
 ON CONFLICT (id) DO NOTHING;
+
+DROP POLICY IF EXISTS "Allow public uploads to transfers bucket" ON storage.objects;
+CREATE POLICY "Allow public uploads to transfers bucket" 
+ON storage.objects FOR INSERT 
+WITH CHECK (bucket_id = 'transfers');
+
+DROP POLICY IF EXISTS "Allow public reads from transfers bucket" ON storage.objects;
+CREATE POLICY "Allow public reads from transfers bucket" 
+ON storage.objects FOR SELECT 
+USING (bucket_id = 'transfers');
+
+DROP POLICY IF EXISTS "Allow public updates on transfers bucket" ON storage.objects;
+CREATE POLICY "Allow public updates on transfers bucket" 
+ON storage.objects FOR UPDATE 
+USING (bucket_id = 'transfers');
