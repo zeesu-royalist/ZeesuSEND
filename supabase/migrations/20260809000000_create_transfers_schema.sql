@@ -1,5 +1,5 @@
 -- ================================================================
--- ZEESUSEND DATABASE MIGRATION & STORAGE SETUP
+-- ZeesuSEND DATABASE MIGRATION & STORAGE SETUP
 -- ================================================================
 
 -- 1. Create Transfers Table

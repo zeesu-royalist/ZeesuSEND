@@ -3,6 +3,7 @@ import { TransferView } from '@/components/transfer/transfer-view';
 import { getAdminSupabase } from '@/lib/supabase/server';
 import { sanitizeTransferKey, isValidKeyFormat } from '@/lib/transfer/key-generator';
 import { TransferItem } from '@/types';
+import { PillButton } from '@/components/ui/pill-button';
 import { AlertCircle, Clock, ShieldX, ArrowLeft, KeyRound } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -16,7 +17,7 @@ interface TransferPageProps {
 export async function generateMetadata({ params }: TransferPageProps) {
   const key = sanitizeTransferKey(params.key);
   return {
-    title: `Transfer ${key} | ZeesuSend`,
+    title: `Transfer ${key} | ZeesuSEND`,
     description: `View and download shared content for transfer key ${key}.`,
   };
 }
@@ -111,7 +112,7 @@ export default async function TransferDetailsPage({ params }: TransferPageProps)
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto my-8">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 flex items-center justify-center">
       <TransferView transfer={transferWithItems} />
     </div>
   );
@@ -125,8 +126,8 @@ function ErrorCard({
   icon: 'notFound' | 'expired' | 'limitReached' | 'invalid';
 }) {
   return (
-    <div className="w-full max-w-md mx-auto glass-card rounded-3xl p-8 text-center space-y-6 shadow-2xl animate-fadeIn">
-      <div className="w-16 h-16 rounded-3xl bg-red-500/10 text-red-500 flex items-center justify-center mx-auto shadow-inner">
+    <div className="w-full max-w-lg mx-auto bg-[#ffffff] border border-[#191314]/15 rounded-[32px] p-8 text-center space-y-6 shadow-xl animate-fadeIn my-12">
+      <div className="w-16 h-16 rounded-2xl bg-red-500/10 text-red-600 flex items-center justify-center mx-auto border border-red-500/20">
         {icon === 'expired' ? (
           <Clock className="w-8 h-8" />
         ) : icon === 'limitReached' ? (
@@ -137,27 +138,25 @@ function ErrorCard({
       </div>
 
       <div className="space-y-2">
-        <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+        <h2 className="text-2xl font-extrabold text-[#191314] tracking-tight">
           Transfer Unavailable
         </h2>
-        <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{message}</p>
+        <p className="text-xs sm:text-sm text-[#191314]/70 leading-relaxed font-mono">{message}</p>
       </div>
 
       <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-        <Link
-          href="/receive"
-          className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-semibold text-sm shadow-md shadow-brand-500/20 transition-all flex items-center justify-center gap-2"
-        >
-          <KeyRound className="w-4 h-4" />
-          <span>Try Another Key</span>
+        <Link href="/receive" className="w-full sm:w-auto">
+          <PillButton variant="primary" size="md" className="w-full">
+            <KeyRound className="w-4 h-4 mr-1" />
+            Try Another Key
+          </PillButton>
         </Link>
 
-        <Link
-          href="/"
-          className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-sm transition-all flex items-center justify-center gap-2"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back Home</span>
+        <Link href="/" className="w-full sm:w-auto">
+          <PillButton variant="secondary" size="md" className="w-full">
+            <ArrowLeft className="w-4 h-4 mr-1" />
+            Back Home
+          </PillButton>
         </Link>
       </div>
     </div>

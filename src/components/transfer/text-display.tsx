@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Copy, Check, Download, FileText } from 'lucide-react';
+import { PillButton } from '@/components/ui/pill-button';
 import { saveAs } from 'file-saver';
 
 interface TextDisplayProps {
@@ -29,47 +30,49 @@ export function TextDisplay({ textContent, transferKey }: TextDisplayProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+      <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-[#191314]/70 font-mono">
         <div className="flex items-center gap-1.5">
-          <FileText className="w-4 h-4 text-brand-500" />
+          <FileText className="w-4 h-4 text-[#191314]" />
           <span>Shared Text</span>
         </div>
         <span>{textContent.length.toLocaleString()} characters</span>
       </div>
 
-      <div className="p-4 sm:p-6 rounded-2xl bg-slate-50/80 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 max-h-96 overflow-y-auto">
-        <pre className="whitespace-pre-wrap font-sans text-sm text-slate-800 dark:text-slate-200 leading-relaxed select-text">
+      <div className="p-5 rounded-2xl bg-[#f4f4f4] border border-[#191314]/15 max-h-96 overflow-y-auto font-mono">
+        <pre className="whitespace-pre-wrap text-xs sm:text-sm text-[#191314] leading-relaxed select-text">
           {textContent}
         </pre>
       </div>
 
       <div className="flex flex-col sm:flex-row items-center gap-3">
-        <button
-          type="button"
+        <PillButton
+          variant="primary"
+          size="md"
           onClick={handleCopy}
-          className="w-full sm:flex-1 py-3 px-4 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-semibold text-sm shadow-md shadow-brand-500/20 transition-all flex items-center justify-center gap-2"
+          className="w-full sm:flex-1"
         >
           {copied ? (
             <>
-              <Check className="w-4 h-4" />
+              <Check className="w-4 h-4 mr-1" />
               <span>Text Copied!</span>
             </>
           ) : (
             <>
-              <Copy className="w-4 h-4" />
+              <Copy className="w-4 h-4 mr-1" />
               <span>Copy Text</span>
             </>
           )}
-        </button>
+        </PillButton>
 
-        <button
-          type="button"
+        <PillButton
+          variant="secondary"
+          size="md"
           onClick={handleDownloadTxt}
-          className="w-full sm:w-auto py-3 px-5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-sm transition-all flex items-center justify-center gap-2"
+          className="w-full sm:w-auto"
         >
-          <Download className="w-4 h-4" />
-          <span>Download as TXT</span>
-        </button>
+          <Download className="w-4 h-4 mr-1" />
+          <span>Save as TXT</span>
+        </PillButton>
       </div>
     </div>
   );

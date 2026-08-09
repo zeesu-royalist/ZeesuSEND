@@ -6,7 +6,7 @@ import { TextEditor } from './text-editor';
 import { TransferSettings } from './transfer-settings';
 import { SuccessCard } from './success-card';
 import { ExpirationOption, DownloadLimitOption, TransferSuccessPayload } from '@/types';
-import { Files, FileText, Send as SendIcon, Loader2, AlertCircle } from 'lucide-react';
+import { Files, FileText, ArrowUpRight, Loader2, AlertCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 
 export function SendContainer() {
@@ -94,7 +94,7 @@ export function SendContainer() {
           const target = uploadTargets[i];
           const fileToUpload = files[target.fileIndex];
 
-          setUploadStatus(`Uploading file ${i + 1} of ${uploadTargets.length}: "${fileToUpload.name}"...`);
+          setUploadStatus(`Uploading ${i + 1}/${uploadTargets.length}: "${fileToUpload.name}"...`);
 
           // Direct upload via Supabase Client or Signed Upload URL
           const { error: uploadError } = await supabase.storage
@@ -140,23 +140,23 @@ export function SendContainer() {
 
   if (successPayload) {
     return (
-      <div className="w-full max-w-xl mx-auto glass-card rounded-3xl p-6 sm:p-8">
+      <div className="w-full">
         <SuccessCard payload={successPayload} onReset={handleReset} />
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-xl mx-auto glass-card rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
+    <div className="w-full space-y-5 text-left">
       {/* MODE TAB TOGGLE */}
-      <div className="grid grid-cols-2 p-1.5 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
+      <div className="grid grid-cols-2 p-1 rounded-2xl bg-white/10 border border-white/10">
         <button
           type="button"
           onClick={() => setMode('file')}
-          className={`flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+          className={`flex items-center justify-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition-all ${
             mode === 'file'
-              ? 'bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-md'
-              : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+              ? 'bg-[#ecf95a] text-[#191314] shadow-md'
+              : 'text-white/70 hover:text-white'
           }`}
         >
           <Files className="w-4 h-4" />
@@ -166,10 +166,10 @@ export function SendContainer() {
         <button
           type="button"
           onClick={() => setMode('text')}
-          className={`flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+          className={`flex items-center justify-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition-all ${
             mode === 'text'
-              ? 'bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-md'
-              : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+              ? 'bg-[#ecf95a] text-[#191314] shadow-md'
+              : 'text-white/70 hover:text-white'
           }`}
         >
           <FileText className="w-4 h-4" />
@@ -179,9 +179,9 @@ export function SendContainer() {
 
       {/* ERROR BANNER */}
       {error && (
-        <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm flex items-start gap-3 animate-fadeIn">
-          <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-          <div className="flex-1">{error}</div>
+        <div className="p-3.5 rounded-xl bg-red-500/20 border border-red-500/30 text-red-200 text-xs flex items-start gap-2.5 animate-fadeIn">
+          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+          <div className="flex-1 font-medium">{error}</div>
         </div>
       )}
 
@@ -205,17 +205,17 @@ export function SendContainer() {
         type="button"
         onClick={handleSend}
         disabled={isLoading || (mode === 'file' && files.length === 0) || (mode === 'text' && !text.trim())}
-        className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-base shadow-xl shadow-brand-600/25 active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+        className="w-full py-3.5 px-6 rounded-full bg-[#ecf95a] hover:bg-[#dbe937] disabled:opacity-40 disabled:cursor-not-allowed text-[#191314] font-extrabold text-sm tracking-tight shadow-lg active:scale-[0.99] transition-all flex items-center justify-center gap-2 border border-[#191314]/10 cursor-pointer"
       >
         {isLoading ? (
           <>
-            <Loader2 className="w-5 h-5 animate-spin" />
+            <Loader2 className="w-4 h-4 animate-spin text-[#191314]" />
             <span>{uploadStatus || 'Processing...'}</span>
           </>
         ) : (
           <>
-            <SendIcon className="w-5 h-5" />
-            <span>SEND</span>
+            <span>GENERATE TRANSFER LINK</span>
+            <ArrowUpRight className="w-4 h-4" />
           </>
         )}
       </button>

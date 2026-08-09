@@ -17,17 +17,17 @@ export function TextEditor({ text, setText }: TextEditorProps) {
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Write or paste your text here..."
-          rows={8}
+          placeholder="Write or paste your text content here..."
+          rows={7}
           maxLength={maxChars}
-          className="w-full text-sm p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40 resize-y"
+          className="w-full text-xs sm:text-sm p-4 rounded-2xl bg-white/5 border border-white/15 text-white placeholder-white/40 focus:outline-none focus:border-[#ecf95a] resize-y font-mono"
         />
       </div>
 
-      <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 px-1">
+      <div className="flex items-center justify-between text-[11px] text-white/60 font-mono px-1">
         <div className="flex items-center gap-1.5">
-          <FileText className="w-3.5 h-3.5 text-slate-400" />
-          <span>Text Transfer Mode</span>
+          <FileText className="w-3.5 h-3.5 text-[#ecf95a]" />
+          <span>Text Mode</span>
         </div>
         <span>
           {charCount.toLocaleString()} / {maxChars.toLocaleString()} chars

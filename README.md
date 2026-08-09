@@ -1,10 +1,10 @@
-# ZeesuSend — Anonymous File, Image & Text Sharing Web Application
+# ZeesuSEND — Anonymous File, Image & Text Sharing Web Application
 
 A modern, fast, production-ready file, image, and text sharing web application built with Next.js App Router, TypeScript, Tailwind CSS, and Supabase.
 
 > [!IMPORTANT]
 > **STRICT NO-AUTHENTICATION REQUIREMENT**
-> ZeesuSend contains **NO authentication system**. There are no user accounts, login forms, signup flows, passwords, profile pages, or dashboards. The entire application operates anonymously using secure 6-character transfer keys.
+> ZeesuSEND contains **NO authentication system**. There are no user accounts, login forms, signup flows, passwords, profile pages, or dashboards. The entire application operates anonymously using secure 6-character transfer keys.
 
 ---
 
@@ -35,7 +35,7 @@ A modern, fast, production-ready file, image, and text sharing web application b
 ---
 
 ## 1. Project Overview
-ZeesuSend is a minimal "Send & Receive" application. A sender uploads one or multiple files/images or types text, selects optional transfer settings (expiration time, download limits), and receives a cryptographically secure 6-character transfer key (e.g., `1A3S7K`). A receiver inputs this key at `/receive` or via direct URL (`/receive?key=1A3S7K`) to preview and download the content.
+ZeesuSEND is a minimal "Send & Receive" application. A sender uploads one or multiple files/images or types text, selects optional transfer settings (expiration time, download limits), and receives a cryptographically secure 6-character transfer key (e.g., `1A3S7K`). A receiver inputs this key at `/receive` or via direct URL (`/receive?key=1A3S7K`) to preview and download the content.
 
 ## 2. Features
 - **Zero Login / No Accounts**: Every user can send and receive immediately.
@@ -65,8 +65,8 @@ ZeesuSend is a minimal "Send & Receive" application. A sender uploads one or mul
 Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/your-org/zeesusend.git
-cd zeesusend
+git clone https://github.com/your-org/ZeesuSEND.git
+cd ZeesuSEND
 npm install
 ```
 

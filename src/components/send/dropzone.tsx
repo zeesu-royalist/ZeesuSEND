@@ -66,34 +66,34 @@ export function Dropzone({ files, setFiles }: DropzoneProps) {
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={openBrowse}
-          className={`cursor-pointer rounded-2xl border-2 border-dashed p-8 sm:p-12 text-center transition-all flex flex-col items-center justify-center gap-3 ${
+          className={`cursor-pointer rounded-2xl border-2 border-dashed p-6 sm:p-10 text-center transition-all flex flex-col items-center justify-center gap-3 ${
             isDragging
-              ? 'border-brand-500 bg-brand-500/10 scale-[1.01]'
-              : 'border-slate-300 dark:border-slate-700/80 hover:border-brand-500/70 bg-slate-50/50 dark:bg-slate-900/30 hover:bg-slate-100/50 dark:hover:bg-slate-900/60'
+              ? 'border-[#ecf95a] bg-[#ecf95a]/10 scale-[1.01]'
+              : 'border-white/20 hover:border-[#ecf95a]/70 bg-white/5 hover:bg-white/10'
           }`}
         >
-          <div className="w-14 h-14 rounded-2xl bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center shadow-inner">
-            <UploadCloud className="w-7 h-7" />
+          <div className="w-12 h-12 rounded-2xl bg-[#ecf95a] text-[#191314] flex items-center justify-center shadow-md">
+            <UploadCloud className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-base font-semibold text-slate-800 dark:text-slate-200">
+            <p className="text-sm font-bold text-white tracking-tight">
               {isDragging ? 'Drop files here' : 'Drop files here or click to browse'}
             </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Supports images, documents, archives, videos & more (up to 100MB)
+            <p className="text-[11px] text-white/60 mt-1 font-mono">
+              Supports images, documents, archives, videos (up to 100MB)
             </p>
           </div>
         </div>
       ) : (
         <div className="space-y-3">
-          <div className="max-h-60 overflow-y-auto space-y-2 pr-1">
+          <div className="max-h-52 overflow-y-auto space-y-2 pr-1">
             {files.map((file, idx) => (
               <div
                 key={`${file.name}-${idx}`}
-                className="flex items-center justify-between p-3 rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200/70 dark:border-slate-800/70 group"
+                className="flex items-center justify-between p-3 rounded-xl bg-white/10 border border-white/10 group"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="p-2 rounded-lg bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400">
+                  <div className="p-2 rounded-lg bg-[#ecf95a] text-[#191314]">
                     {file.type.startsWith('image/') ? (
                       <ImageIcon className="w-4 h-4" />
                     ) : file.type.includes('pdf') || file.type.includes('text') ? (
@@ -103,10 +103,10 @@ export function Dropzone({ files, setFiles }: DropzoneProps) {
                     )}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">
+                    <p className="text-xs font-bold text-white truncate">
                       {file.name}
                     </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                    <p className="text-[10px] text-white/60 font-mono">
                       {formatFileSize(file.size)}
                     </p>
                   </div>
@@ -115,7 +115,7 @@ export function Dropzone({ files, setFiles }: DropzoneProps) {
                 <button
                   type="button"
                   onClick={() => removeFile(idx)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
+                  className="p-1.5 rounded-lg text-white/60 hover:text-red-400 hover:bg-red-500/20 transition-colors"
                   aria-label="Remove file"
                 >
                   <X className="w-4 h-4" />
@@ -128,13 +128,13 @@ export function Dropzone({ files, setFiles }: DropzoneProps) {
             <button
               type="button"
               onClick={openBrowse}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-600 dark:text-brand-400 hover:underline focus:outline-none"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#ecf95a] hover:underline focus:outline-none"
             >
               <Plus className="w-4 h-4" />
               Add more files
             </button>
-            <span className="text-xs text-slate-500 dark:text-slate-400">
-              {files.length} file{files.length > 1 ? 's' : ''} selected ({formatFileSize(files.reduce((acc, f) => acc + f.size, 0))})
+            <span className="text-[11px] text-white/60 font-mono">
+              {files.length} file{files.length > 1 ? 's' : ''} ({formatFileSize(files.reduce((acc, f) => acc + f.size, 0))})
             </span>
           </div>
         </div>

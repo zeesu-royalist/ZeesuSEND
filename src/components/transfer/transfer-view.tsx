@@ -5,7 +5,8 @@ import { Transfer, TransferItem } from '@/types';
 import { FilePreview } from './file-preview';
 import { TextDisplay } from './text-display';
 import { formatFileSize } from '../send/dropzone';
-import { Download, PackageCheck, AlertCircle, Clock, ShieldCheck, FileArchive, Loader2 } from 'lucide-react';
+import { PillButton } from '@/components/ui/pill-button';
+import { Download, AlertCircle, Clock, FileArchive, Loader2 } from 'lucide-react';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 
@@ -89,7 +90,7 @@ export function TransferView({ transfer }: TransferViewProps) {
       await Promise.all(downloadPromises);
 
       const zipContent = await zip.generateAsync({ type: 'blob' });
-      saveAs(zipContent, `ZeesuSend_${transfer.transfer_key}.zip`);
+      saveAs(zipContent, `ZeesuSEND_${transfer.transfer_key}.zip`);
     } catch (err: any) {
       console.error('Download All error:', err);
       setDownloadError(err.message || 'Failed to generate ZIP download.');
@@ -99,24 +100,24 @@ export function TransferView({ transfer }: TransferViewProps) {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto glass-card rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl animate-fadeIn">
+    <div className="w-full max-w-3xl mx-auto bg-[#ffffff] border border-[#191314]/15 rounded-[32px] p-6 sm:p-10 space-y-6 shadow-xl animate-fadeIn">
       {/* HEADER BAR */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-slate-200/80 dark:border-slate-800/80">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-[#191314]/10">
         <div>
           <div className="flex items-center gap-2">
-            <span className="px-3 py-1 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 font-mono-key text-sm font-black tracking-widest">
+            <span className="px-3 py-1 rounded-full bg-[#ecf95a] text-[#191314] font-mono text-sm font-extrabold tracking-widest border border-[#191314]/15">
               {transfer.transfer_key}
             </span>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 font-semibold uppercase tracking-wider">
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#f4f4f4] text-[#191314] font-bold uppercase tracking-wider border border-[#191314]/10">
               {transfer.status}
             </span>
           </div>
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white mt-2">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-[#191314] tracking-tight mt-2">
             {textItem ? 'Shared Text Transfer' : `${fileItems.length} File${fileItems.length > 1 ? 's' : ''} Ready`}
           </h2>
         </div>
 
-        <div className="text-left sm:text-right text-xs text-slate-500 dark:text-slate-400 space-y-1">
+        <div className="text-left sm:text-right text-xs text-[#191314]/70 space-y-1 font-mono">
           <div className="flex items-center sm:justify-end gap-1">
             <Clock className="w-3.5 h-3.5" />
             <span>
@@ -130,7 +131,7 @@ export function TransferView({ transfer }: TransferViewProps) {
       </div>
 
       {downloadError && (
-        <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm flex items-center gap-3">
+        <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-600 text-xs sm:text-sm flex items-center gap-3 font-mono">
           <AlertCircle className="w-5 h-5 shrink-0" />
           <span>{downloadError}</span>
         </div>
@@ -149,15 +150,15 @@ export function TransferView({ transfer }: TransferViewProps) {
               <div key={item.id} className="space-y-2">
                 <FilePreview item={item} />
                 <div className="flex justify-end">
-                  <button
-                    type="button"
+                  <PillButton
+                    variant="dark"
+                    size="sm"
                     onClick={() => handleSingleDownload(item)}
                     disabled={isDownloading}
-                    className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white font-semibold text-xs transition-all flex items-center gap-1.5 focus:outline-none"
                   >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>Download {item.file_name}</span>
-                  </button>
+                    <Download className="w-3.5 h-3.5 mr-1" />
+                    Download {item.file_name}
+                  </PillButton>
                 </div>
               </div>
             ))}
@@ -165,29 +166,30 @@ export function TransferView({ transfer }: TransferViewProps) {
 
           {/* DOWNLOAD ALL BUTTON FOR MULTIPLE FILES */}
           {fileItems.length > 1 && (
-            <div className="pt-4 border-t border-slate-200/80 dark:border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <span className="text-xs text-slate-500 dark:text-slate-400">
+            <div className="pt-6 border-t border-[#191314]/10 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono">
+              <span className="text-xs text-[#191314]/70">
                 Total size: {formatFileSize(fileItems.reduce((acc, f) => acc + (f.file_size || 0), 0))}
               </span>
 
-              <button
-                type="button"
+              <PillButton
+                variant="primary"
+                size="md"
                 onClick={handleDownloadAll}
                 disabled={isDownloading}
-                className="w-full sm:w-auto py-3.5 px-6 rounded-2xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold text-sm shadow-xl shadow-brand-600/25 transition-all flex items-center justify-center gap-2"
+                className="w-full sm:w-auto"
               >
                 {isDownloading ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin text-[#191314]" />
                     <span>Preparing Download...</span>
                   </>
                 ) : (
                   <>
-                    <FileArchive className="w-4 h-4" />
-                    <span>Download All (.ZIP)</span>
+                    <FileArchive className="w-4 h-4 mr-1" />
+                    <span>Download All (.ZIP) ↗</span>
                   </>
                 )}
-              </button>
+              </PillButton>
             </div>
           )}
         </div>

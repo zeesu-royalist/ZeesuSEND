@@ -17,23 +17,23 @@ export function TransferSettings({
   setDownloadLimit,
 }: TransferSettingsProps) {
   return (
-    <div className="bg-slate-50/80 dark:bg-slate-900/60 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800/80 space-y-4">
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-        <Settings2 className="w-4 h-4 text-brand-500" />
+    <div className="bg-white/5 rounded-2xl p-4 border border-white/10 space-y-3">
+      <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[#ecf95a]">
+        <Settings2 className="w-3.5 h-3.5" />
         <span>Transfer Settings</span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {/* Expiration Setting */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-slate-400" />
-            <span>Expiration Time</span>
+        <div className="space-y-1">
+          <label className="text-[11px] font-medium text-white/70 flex items-center gap-1.5 font-mono">
+            <Clock className="w-3.5 h-3.5 text-white/50" />
+            <span>Expiration</span>
           </label>
           <select
             value={expiration}
             onChange={(e) => setExpiration(e.target.value as ExpirationOption)}
-            className="w-full text-sm bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500/40"
+            className="w-full text-xs bg-[#191314] border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#ecf95a] font-mono cursor-pointer"
           >
             <option value="1h">1 Hour</option>
             <option value="6h">6 Hours</option>
@@ -45,15 +45,15 @@ export function TransferSettings({
         </div>
 
         {/* Download Limit Setting */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-            <Download className="w-3.5 h-3.5 text-slate-400" />
+        <div className="space-y-1">
+          <label className="text-[11px] font-medium text-white/70 flex items-center gap-1.5 font-mono">
+            <Download className="w-3.5 h-3.5 text-white/50" />
             <span>Download Limit</span>
           </label>
           <select
             value={downloadLimit}
             onChange={(e) => setDownloadLimit(e.target.value as DownloadLimitOption)}
-            className="w-full text-sm bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500/40"
+            className="w-full text-xs bg-[#191314] border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#ecf95a] font-mono cursor-pointer"
           >
             <option value="unlimited">Unlimited (Default)</option>
             <option value="1">1 Download</option>

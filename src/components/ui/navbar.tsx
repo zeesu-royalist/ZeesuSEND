@@ -2,60 +2,51 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ShieldCheck, Send, Download } from 'lucide-react';
-import { ThemeToggle } from './theme-toggle';
+import { PillButton } from './pill-button';
+import { Download } from 'lucide-react';
 
 export function Navbar() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-md bg-white/70 dark:bg-slate-950/70 border-b border-slate-200/80 dark:border-slate-800/80 transition-colors">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-        <Link
-          href="/"
-          className="flex items-center gap-2.5 group focus:outline-none focus:ring-2 focus:ring-brand-500 rounded-lg p-1"
-        >
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-brand-500/20 group-hover:scale-105 transition-transform">
-            <ShieldCheck className="w-5 h-5" />
+    <header className="sticky top-0 z-50 bg-[#ffffff]/90 backdrop-blur-md border-b border-[#191314]/10 transition-colors rounded-b-3xl overflow-hidden shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        {/* LOGO MARK */}
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="w-10 h-10 rounded-2xl bg-[#191314] flex items-center justify-center shadow-md group-hover:scale-105 transition-transform duration-200">
+            <span className="text-[#ecf95a] font-extrabold text-xl tracking-tighter">Z</span>
           </div>
-          <div className="flex flex-col">
-            <span className="font-bold text-lg leading-tight tracking-tight text-slate-900 dark:text-white">
-              Zeesu<span className="text-brand-500">Send</span>
-            </span>
-            <span className="text-[10px] uppercase tracking-wider font-semibold text-slate-400 dark:text-slate-500">
-              Anonymous Sharing
-            </span>
-          </div>
+          <span className="font-extrabold text-xl tracking-tight text-[#191314]">
+            Zeesu<span className="text-[#191314]/60">SEND</span>
+          </span>
         </Link>
 
-        <div className="flex items-center gap-2 sm:gap-4">
-          <nav className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900/80 p-1 rounded-xl border border-slate-200/60 dark:border-slate-800/60">
-            <Link
-              href="/"
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                pathname === '/'
-                  ? 'bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-              }`}
-            >
-              <Send className="w-3.5 h-3.5" />
-              <span>Send</span>
-            </Link>
+        {/* NAVIGATION LINKS */}
+        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-[#191314]/70">
+          <a href="#how-it-works" className="hover:text-[#191314] transition-colors">
+            How it works
+          </a>
+          <a href="#features" className="hover:text-[#191314] transition-colors">
+            Features
+          </a>
+          <a href="#security" className="hover:text-[#191314] transition-colors">
+            Security
+          </a>
+          <a href="#faqs" className="hover:text-[#191314] transition-colors">
+            FAQs
+          </a>
+        </nav>
 
-            <Link
-              href="/receive"
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                pathname === '/receive'
-                  ? 'bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-              }`}
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Receive</span>
-            </Link>
-          </nav>
-
-          <ThemeToggle />
+        {/* TOP-RIGHT ACTION BUTTON */}
+        <div className="flex items-center gap-3">
+          <Link href="/receive">
+            <PillButton variant="dark" size="sm" className="hidden sm:inline-flex">
+              Receive File
+            </PillButton>
+            <PillButton variant="dark" size="sm" className="sm:hidden">
+              <Download className="w-4 h-4" />
+            </PillButton>
+          </Link>
         </div>
       </div>
     </header>

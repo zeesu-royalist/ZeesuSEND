@@ -3,7 +3,9 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { sanitizeTransferKey, isValidKeyFormat } from '@/lib/transfer/key-generator';
-import { Download, KeyRound, AlertCircle, ArrowRight } from 'lucide-react';
+import { SectionBadge } from '@/components/ui/section-badge';
+import { PillButton } from '@/components/ui/pill-button';
+import { KeyRound, AlertCircle } from 'lucide-react';
 
 export function ReceiveForm() {
   const router = useRouter();
@@ -53,30 +55,36 @@ export function ReceiveForm() {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto glass-card rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
-      <div className="text-center space-y-2">
-        <div className="w-14 h-14 rounded-2xl bg-brand-500/10 text-brand-500 flex items-center justify-center mx-auto shadow-inner">
+    <div className="w-full max-w-lg mx-auto bg-[#ffffff] border border-[#191314]/15 rounded-[32px] p-6 sm:p-10 space-y-8 shadow-xl">
+      <div className="text-center space-y-3">
+        <div className="flex justify-center">
+          <SectionBadge>Receive File</SectionBadge>
+        </div>
+
+        <div className="w-14 h-14 rounded-2xl bg-[#ecf95a] text-[#191314] flex items-center justify-center mx-auto shadow-sm border border-[#191314]/10">
           <KeyRound className="w-7 h-7" />
         </div>
-        <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-          Receive Transfer
+
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-[#191314] tracking-tight">
+          Enter Transfer Key
         </h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          Enter the 6-character transfer key shared with you to view and download content.
+
+        <p className="text-xs sm:text-sm text-[#191314]/70 max-w-sm mx-auto leading-relaxed font-normal">
+          Enter the 6-character key shared with you to access and download files or text.
         </p>
       </div>
 
       {error && (
-        <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm flex items-center gap-3 animate-fadeIn">
+        <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-600 text-xs sm:text-sm flex items-center gap-3 animate-fadeIn font-mono">
           <AlertCircle className="w-5 h-5 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-1.5">
-          <label className="text-xs uppercase font-bold text-slate-400 tracking-wider block text-center">
-            Transfer Key
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-2">
+          <label className="text-xs uppercase font-bold text-[#191314]/60 tracking-wider block text-center font-mono">
+            6-Character Key
           </label>
           <input
             type="text"
@@ -85,19 +93,19 @@ export function ReceiveForm() {
             placeholder="1A3S7K"
             maxLength={6}
             autoFocus
-            className="w-full font-mono-key text-3xl font-black text-center tracking-widest uppercase py-4 px-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-300 dark:placeholder-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500/40"
+            className="w-full font-mono text-4xl sm:text-5xl font-black text-center tracking-widest uppercase py-4 px-4 rounded-2xl bg-[#f4f4f4] border border-[#191314]/20 text-[#191314] placeholder-[#191314]/30 focus:outline-none focus:border-[#191314]"
           />
         </div>
 
-        <button
+        <PillButton
           type="submit"
+          variant="primary"
+          size="lg"
           disabled={isSubmitting || key.length !== 6}
-          className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-base shadow-xl shadow-brand-600/25 active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+          className="w-full py-4 text-base font-bold"
         >
-          <Download className="w-5 h-5" />
-          <span>RECEIVE</span>
-          <ArrowRight className="w-4 h-4" />
-        </button>
+          {isSubmitting ? 'Accessing Transfer...' : 'Access Transfer ↗'}
+        </PillButton>
       </form>
     </div>
   );
