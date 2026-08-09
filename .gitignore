@@ -2,12 +2,16 @@
 node_modules/
 vendor/
 
-# Environment variables
+# Environment variables (NEVER commit secrets to git)
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 .env.*
 !.env.example
 
-# Build / output
+# Next.js build / output
 dist/
 build/
 out/
@@ -28,12 +32,10 @@ Thumbs.db
 *.swp
 *.swo
 
-# Temporary files
+# Temporary files & caches
 tmp/
 temp/
 *.tmp
-
-# Cache
 .cache/
 .npm/
 .yarn/
@@ -48,13 +50,3 @@ secrets.json
 # Database
 *.sqlite
 *.sqlite3
-
-# Python
-__pycache__/
-*.py[cod]
-.venv/
-venv/
-.pytest_cache/
-
-# Jupyter
-.ipynb_checkpoints/
