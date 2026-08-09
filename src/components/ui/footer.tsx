@@ -21,7 +21,7 @@ export function Footer() {
               <span>Instant & Anonymous</span>
             </div>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-tight">
-              Ready to Send Files Securely?
+              Ready to Send Files Securely ?
             </h2>
             <p className="text-xs sm:text-sm text-white/70 leading-relaxed font-sans">
               No account, email, or passwords required. Upload your file, get your 6-character key, and share instantly.
