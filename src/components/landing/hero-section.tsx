@@ -5,6 +5,7 @@ import { PillButton } from '@/components/ui/pill-button';
 import { CircularBadge } from '@/components/ui/circular-badge';
 import { GlassStatCard } from '@/components/ui/glass-stat-card';
 import { SendContainer } from '@/components/send/send-container';
+import CursorGrid from '@/components/ui/cursor-grid';
 import { Monitor, Puzzle } from 'lucide-react';
 
 export function HeroSection() {
@@ -15,8 +16,27 @@ export function HeroSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 items-stretch relative">
           
           {/* ================= LEFT CARD (WHITE PANEL) ================= */}
-          <div className="bg-[#ffffff] rounded-[28px] sm:rounded-[36px] p-8 sm:p-12 lg:p-14 flex flex-col justify-between min-h-[560px] lg:min-h-[620px] shadow-sm border border-[#191314]/5 relative">
-            <div className="space-y-6">
+          <div className="bg-[#ffffff] rounded-[28px] sm:rounded-[36px] p-8 sm:p-12 lg:p-14 flex flex-col justify-between min-h-[560px] lg:min-h-[620px] shadow-sm border border-[#191314]/5 relative overflow-hidden">
+            {/* Interactive Cursor Grid Background */}
+            <div className="absolute inset-0 pointer-events-none z-0">
+              <CursorGrid
+                cellSize={70}
+                color="#eaf94bff"
+                radius={140}
+                falloff="smooth"
+                holdTime={400}
+                fadeDuration={800}
+                lineWidth={1.2}
+                maxOpacity={1}
+                fillOpacity={0}
+                gridOpacity={0}
+                cellRadius={0}
+                clickPulse
+                pulseSpeed={600}
+              />
+            </div>
+
+            <div className="space-y-6 relative z-10">
               {/* Headlines matching reference line-height and monospace font */}
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#191314] tracking-tight leading-[1.06] font-mono">
                 Secure &<br />
@@ -39,7 +59,7 @@ export function HeroSection() {
 
               {/* Secondary Headline */}
               <h1 className="hidden lg:block text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#191314] tracking-tight leading-[1.06] font-mono">
-                Quick Downloads,<br />
+                Quick Downloads<br />
                 Zero Worries
               </h1>
 
@@ -58,7 +78,7 @@ export function HeroSection() {
             </div>
 
             {/* Bottom App/Store Pill Badges */}
-            <div className="flex flex-wrap items-center gap-3 pt-12">
+            <div className="flex flex-wrap items-center gap-3 pt-12 relative z-10">
               <div className="px-4 py-2.5 rounded-full bg-white border border-[#191314]/20 text-[#191314] text-xs font-bold font-mono inline-flex items-center gap-2 shadow-sm hover:bg-[#f4f4f4] cursor-pointer transition-colors">
                 <span>Desktop App</span>
                 <Monitor className="w-4 h-4 text-[#191314]" />

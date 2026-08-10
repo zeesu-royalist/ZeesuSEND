@@ -4,7 +4,7 @@ import { getAdminSupabase } from '@/lib/supabase/server';
 import { sanitizeTransferKey, isValidKeyFormat } from '@/lib/transfer/key-generator';
 import { TransferItem } from '@/types';
 import { PillButton } from '@/components/ui/pill-button';
-import { AlertCircle, Clock, ShieldX, ArrowLeft, KeyRound } from 'lucide-react';
+import { AlertCircle, Clock, ShieldX } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -147,14 +147,12 @@ function ErrorCard({
       <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
         <Link href="/receive" className="w-full sm:w-auto">
           <PillButton variant="primary" size="md" className="w-full">
-            <KeyRound className="w-4 h-4 mr-1" />
             Try Another Key
           </PillButton>
         </Link>
 
         <Link href="/" className="w-full sm:w-auto">
           <PillButton variant="secondary" size="md" className="w-full">
-            <ArrowLeft className="w-4 h-4 mr-1" />
             Back Home
           </PillButton>
         </Link>

@@ -12,6 +12,7 @@ const martianMono = Martian_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://zeesu-send.vercel.app'),
   title: 'Fast & Secure File Transfer | ZeesuSEND',
   description: 'Upload, share & receive files with confidence. End-to-end encryption, auto-expiring links, and zero registration.',
   openGraph: {
