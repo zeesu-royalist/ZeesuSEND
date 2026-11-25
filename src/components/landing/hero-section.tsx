@@ -69,6 +69,7 @@ export function HeroSection() {
                   <PillButton
                     variant="primary"
                     size="lg"
+                    showArrow
                     className="px-7 py-3.5 text-sm font-extrabold shadow-sm"
                   >
                     Get Started

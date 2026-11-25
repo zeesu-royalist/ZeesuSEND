@@ -14,6 +14,7 @@ export function ReceiveForm() {
   const [key, setKey] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPasted, setIsPasted] = useState(false);
 
   // Check URL query parameter `?key=1A3S7K`
   useEffect(() => {
@@ -28,6 +29,30 @@ export function ReceiveForm() {
     const sanitized = sanitizeTransferKey(val);
     setKey(sanitized);
     if (error) setError(null);
+  };
+
+  const handlePaste = async () => {
+    try {
+      const clipboardText = await navigator.clipboard.readText();
+      if (!clipboardText) return;
+
+      let extracted = clipboardText.trim();
+      // Extract key from URLs if user copied a link (e.g. ?key=1A3S7K or /transfer/1A3S7K)
+      const urlMatch = extracted.match(/(?:key=|\/transfer\/)([A-Za-z0-9]{6})/i);
+      if (urlMatch) {
+        extracted = urlMatch[1];
+      }
+
+      const sanitized = sanitizeTransferKey(extracted);
+      if (sanitized) {
+        setKey(sanitized.slice(0, 6));
+        if (error) setError(null);
+        setIsPasted(true);
+        setTimeout(() => setIsPasted(false), 2000);
+      }
+    } catch (err) {
+      console.error('Failed to read clipboard:', err);
+    }
   };
 
   const handleSubmit = (e: FormEvent) => {
@@ -107,15 +132,34 @@ export function ReceiveForm() {
             <label className="text-xs uppercase font-bold text-[#191314]/60 tracking-wider block text-center font-mono">
               6-Character Key
             </label>
-            <input
-              type="text"
-              value={key}
-              onChange={(e) => handleInputChange(e.target.value)}
-              placeholder="1A3S7K"
-              maxLength={6}
-              autoFocus
-              className="w-full font-mono text-4xl sm:text-5xl font-black text-center tracking-widest uppercase py-4 px-4 rounded-2xl bg-[#f4f4f4] border border-[#191314]/20 text-[#191314] placeholder-[#191314]/30 focus:outline-none focus:border-[#191314]"
-            />
+
+            {/* Input with embedded top-right PAST pill button (matching mockup exactly) */}
+            <div className="relative flex items-center">
+              <input
+                type="text"
+                value={key}
+                onChange={(e) => handleInputChange(e.target.value)}
+                placeholder="1A3S7K"
+                maxLength={6}
+                autoFocus
+                className="w-full font-mono text-3xl sm:text-5xl font-black text-center tracking-widest uppercase py-5 sm:py-6 px-12 sm:px-20 rounded-2xl bg-[#f4f4f4] border border-[#191314]/20 text-[#191314] placeholder-[#191314]/30 focus:outline-none focus:border-[#191314] transition-all"
+              />
+
+              {/* Exact pill button from user mockup: top-right corner, rounded-full, thin border, PAST text */}
+              <button
+                type="button"
+                onClick={handlePaste}
+                title="Paste transfer key"
+                aria-label="Paste transfer key"
+                className={`absolute top-1.5 right-1.5 sm:top-2 sm:right-1.5 px-3 py-0.5 sm:px-3 sm:py-0.5 rounded-full border transition-all duration-150 active:scale-95 cursor-pointer text-[11px] sm:text-xs font-mono tracking-wider uppercase select-none ${
+                  isPasted
+                    ? 'bg-[#ecf95a] border-[#191314]/40 text-[#191314] font-bold shadow-xs'
+                    : 'bg-transparent hover:bg-white border-[#191314]/25 hover:border-[#191314]/50 text-[#191314]/50 hover:text-[#191314] font-medium'
+                }`}
+              >
+                {isPasted ? 'PASTED' : 'PAST'}
+              </button>
+            </div>
           </div>
 
           <PillButton

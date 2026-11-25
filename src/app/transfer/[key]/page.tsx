@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import { TransferView } from '@/components/transfer/transfer-view';
-import { getAdminSupabase } from '@/lib/supabase/server';
+import { getDb } from '@/lib/db';
+import { createPresignedDownloadUrl } from '@/lib/storage';
+import { purgeTransferById } from '@/lib/cleanup';
 import { sanitizeTransferKey, isValidKeyFormat } from '@/lib/transfer/key-generator';
-import { TransferItem } from '@/types';
+import { TransferItem, Transfer } from '@/types';
 import { PillButton } from '@/components/ui/pill-button';
 import { AlertCircle, Clock, ShieldX } from 'lucide-react';
 
@@ -30,24 +32,22 @@ export default async function TransferDetailsPage({ params }: TransferPageProps)
     return <ErrorCard message="Invalid transfer key format." icon="invalid" />;
   }
 
-  const supabaseAdmin = getAdminSupabase();
+  const sql = getDb();
 
   // Query Transfer
-  const { data: transfer, error: transferError } = await supabaseAdmin
-    .from('transfers')
-    .select('*')
-    .eq('transfer_key', sanitizedKey)
-    .maybeSingle();
+  const transferRows = await sql`
+    SELECT * FROM public.transfers WHERE transfer_key = ${sanitizedKey} LIMIT 1
+  `;
 
-  if (transferError || !transfer) {
+  if (!transferRows || transferRows.length === 0) {
     return <ErrorCard message="Transfer not found." icon="notFound" />;
   }
 
+  const transfer = transferRows[0];
+
   // Check Expiration
   if (transfer.expires_at && new Date(transfer.expires_at).getTime() <= Date.now()) {
-    if (transfer.status !== 'expired') {
-      await supabaseAdmin.from('transfers').update({ status: 'expired' }).eq('id', transfer.id);
-    }
+    purgeTransferById(transfer.id).catch(() => {});
     return <ErrorCard message="This transfer has expired." icon="expired" />;
   }
 
@@ -57,10 +57,9 @@ export default async function TransferDetailsPage({ params }: TransferPageProps)
     transfer.download_count >= transfer.download_limit
   ) {
     if (transfer.status !== 'download_limit_reached') {
-      await supabaseAdmin
-        .from('transfers')
-        .update({ status: 'download_limit_reached' })
-        .eq('id', transfer.id);
+      await sql`
+        UPDATE public.transfers SET status = 'download_limit_reached' WHERE id = ${transfer.id}
+      `;
     }
     return (
       <ErrorCard
@@ -71,23 +70,20 @@ export default async function TransferDetailsPage({ params }: TransferPageProps)
   }
 
   // Fetch Items
-  const { data: items } = await supabaseAdmin
-    .from('transfer_items')
-    .select('*')
-    .eq('transfer_id', transfer.id);
+  const items = await sql`
+    SELECT * FROM public.transfer_items WHERE transfer_id = ${transfer.id} ORDER BY created_at ASC
+  `;
 
   // Generate signed URLs for preview
   const processedItems: TransferItem[] = await Promise.all(
-    (items || []).map(async (item) => {
+    (items || []).map(async (item: any) => {
       let signedUrl: string | undefined = undefined;
 
       if (item.file_path && (item.type === 'image' || item.type === 'file')) {
-        const { data: signedData } = await supabaseAdmin.storage
-          .from('transfers')
-          .createSignedUrl(item.file_path, 3600);
-
-        if (signedData?.signedUrl) {
-          signedUrl = signedData.signedUrl;
+        try {
+          signedUrl = await createPresignedDownloadUrl(item.file_path, null, 3600);
+        } catch (e) {
+          console.error('Error generating preview signed URL:', e);
         }
       }
 
@@ -98,7 +94,7 @@ export default async function TransferDetailsPage({ params }: TransferPageProps)
         file_name: item.file_name,
         file_path: item.file_path,
         mime_type: item.mime_type,
-        file_size: item.file_size,
+        file_size: item.file_size ? Number(item.file_size) : null,
         text_content: item.text_content,
         created_at: item.created_at,
         signed_url: signedUrl,
@@ -106,8 +102,14 @@ export default async function TransferDetailsPage({ params }: TransferPageProps)
     })
   );
 
-  const transferWithItems = {
-    ...transfer,
+  const transferWithItems: Transfer = {
+    id: transfer.id,
+    transfer_key: transfer.transfer_key,
+    status: transfer.status,
+    created_at: transfer.created_at,
+    expires_at: transfer.expires_at,
+    download_limit: transfer.download_limit,
+    download_count: transfer.download_count,
     items: processedItems,
   };
 

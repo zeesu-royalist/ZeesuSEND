@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getAdminSupabase } from '@/lib/supabase/server';
+import { getDb } from '@/lib/db';
+import { createPresignedDownloadUrl } from '@/lib/storage';
 import { rateLimit, getClientIp } from '@/lib/transfer/rate-limiter';
 import { sanitizeTransferKey, isValidKeyFormat } from '@/lib/transfer/key-generator';
 
@@ -27,22 +28,24 @@ export async function POST(
       return NextResponse.json({ error: 'Invalid transfer key format.' }, { status: 400 });
     }
 
-    const supabaseAdmin = getAdminSupabase();
+    const sql = getDb();
 
     // 2. Fetch transfer record
-    const { data: transfer, error: transferError } = await supabaseAdmin
-      .from('transfers')
-      .select('*')
-      .eq('transfer_key', sanitizedKey)
-      .maybeSingle();
+    const transferRows = await sql`
+      SELECT * FROM public.transfers WHERE transfer_key = ${sanitizedKey} LIMIT 1
+    `;
 
-    if (transferError || !transfer) {
+    if (!transferRows || transferRows.length === 0) {
       return NextResponse.json({ error: 'Transfer not found.' }, { status: 404 });
     }
 
+    const transfer = transferRows[0];
+
     // 3. Expiration Check
     if (transfer.expires_at && new Date(transfer.expires_at).getTime() <= Date.now()) {
-      await supabaseAdmin.from('transfers').update({ status: 'expired' }).eq('id', transfer.id);
+      await sql`
+        UPDATE public.transfers SET status = 'expired' WHERE id = ${transfer.id}
+      `;
       return NextResponse.json({ error: 'This transfer has expired.' }, { status: 410 });
     }
 
@@ -51,58 +54,44 @@ export async function POST(
       transfer.download_limit !== null &&
       transfer.download_count >= transfer.download_limit
     ) {
-      await supabaseAdmin
-        .from('transfers')
-        .update({ status: 'download_limit_reached' })
-        .eq('id', transfer.id);
+      await sql`
+        UPDATE public.transfers SET status = 'download_limit_reached' WHERE id = ${transfer.id}
+      `;
       return NextResponse.json(
         { error: 'This transfer has reached its download limit.' },
         { status: 410 }
       );
     }
 
-    // 5. ATOMIC Increment of Download Count via RPC function or SQL update
-    const { data: rpcData, error: rpcError } = await supabaseAdmin.rpc(
-      'increment_transfer_download_count',
-      { p_transfer_id: transfer.id }
-    );
+    // 5. ATOMIC Increment of Download Count
+    const updatedRows = await sql`
+      UPDATE public.transfers
+      SET download_count = download_count + 1,
+          status = CASE
+            WHEN download_limit IS NOT NULL AND download_count + 1 >= download_limit THEN 'download_limit_reached'
+            ELSE status
+          END
+      WHERE id = ${transfer.id}
+        AND (download_limit IS NULL OR download_count < download_limit)
+      RETURNING *
+    `;
 
-    let isAllowed = false;
-    if (!rpcError && rpcData && rpcData.length > 0) {
-      isAllowed = rpcData[0].success;
-    } else {
-      // Fallback atomic SQL update if RPC function is not installed in database yet
-      const { data: updatedTransfer, error: updateError } = await supabaseAdmin
-        .from('transfers')
-        .update({ download_count: transfer.download_count + 1 })
-        .eq('id', transfer.id)
-        .select()
-        .single();
-
-      if (!updateError && updatedTransfer) {
-        isAllowed = true;
-      }
-    }
-
-    if (!isAllowed) {
+    if (!updatedRows || updatedRows.length === 0) {
       return NextResponse.json(
         { error: 'Download denied. Transfer may be expired or limit reached.' },
         { status: 403 }
       );
     }
 
-    // 6. Fetch items and generate short-lived signed URLs for storage files
-    const { data: items, error: itemsError } = await supabaseAdmin
-      .from('transfer_items')
-      .select('*')
-      .eq('transfer_id', transfer.id);
+    const updatedTransfer = updatedRows[0];
 
-    if (itemsError || !items) {
-      return NextResponse.json({ error: 'Failed to retrieve transfer items.' }, { status: 500 });
-    }
+    // 6. Fetch items and generate short-lived signed URLs for storage files
+    const items = await sql`
+      SELECT * FROM public.transfer_items WHERE transfer_id = ${transfer.id} ORDER BY created_at ASC
+    `;
 
     const downloadLinks = await Promise.all(
-      items.map(async (item) => {
+      items.map(async (item: any) => {
         if (item.type === 'text') {
           return {
             id: item.id,
@@ -113,16 +102,12 @@ export async function POST(
 
         let signedUrl = '';
         if (item.file_path) {
-          // Generate 5-minute signed URL with download attribute forced to original file_name
-          const { data: signedData } = await supabaseAdmin.storage
-            .from('transfers')
-            .createSignedUrl(item.file_path, 300, {
-              download: item.file_name || 'download',
-            });
-
-          if (signedData?.signedUrl) {
-            signedUrl = signedData.signedUrl;
-          }
+          // Generate 5-minute signed URL with attachment download header
+          signedUrl = await createPresignedDownloadUrl(
+            item.file_path,
+            item.file_name || 'download',
+            300
+          );
         }
 
         return {
@@ -130,7 +115,7 @@ export async function POST(
           type: item.type,
           fileName: item.file_name,
           mimeType: item.mime_type,
-          fileSize: item.file_size,
+          fileSize: item.file_size ? Number(item.file_size) : null,
           signedUrl,
         };
       })
@@ -138,7 +123,7 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      downloadCount: transfer.download_count + 1,
+      downloadCount: updatedTransfer.download_count,
       items: downloadLinks,
     });
   } catch (err: any) {

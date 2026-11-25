@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getAdminSupabase } from '@/lib/supabase/server';
+import { getDb } from '@/lib/db';
+import { createPresignedDownloadUrl } from '@/lib/storage';
 import { sanitizeTransferKey, isValidKeyFormat } from '@/lib/transfer/key-generator';
 
 export const dynamic = 'force-dynamic';
@@ -17,18 +18,18 @@ export async function GET(
       return NextResponse.json({ error: 'Invalid key format.' }, { status: 400 });
     }
 
-    const supabaseAdmin = getAdminSupabase();
+    const sql = getDb();
 
     // Verify transfer
-    const { data: transfer, error: transferError } = await supabaseAdmin
-      .from('transfers')
-      .select('*')
-      .eq('transfer_key', sanitizedKey)
-      .maybeSingle();
+    const transferRows = await sql`
+      SELECT * FROM public.transfers WHERE transfer_key = ${sanitizedKey} LIMIT 1
+    `;
 
-    if (transferError || !transfer) {
+    if (!transferRows || transferRows.length === 0) {
       return NextResponse.json({ error: 'Transfer not found.' }, { status: 404 });
     }
+
+    const transfer = transferRows[0];
 
     // Expiration & limit checks
     if (transfer.expires_at && new Date(transfer.expires_at).getTime() <= Date.now()) {
@@ -40,16 +41,15 @@ export async function GET(
     }
 
     // Retrieve item
-    const { data: item, error: itemError } = await supabaseAdmin
-      .from('transfer_items')
-      .select('*')
-      .eq('id', itemId)
-      .eq('transfer_id', transfer.id)
-      .maybeSingle();
+    const itemRows = await sql`
+      SELECT * FROM public.transfer_items WHERE id = ${itemId} AND transfer_id = ${transfer.id} LIMIT 1
+    `;
 
-    if (itemError || !item) {
+    if (!itemRows || itemRows.length === 0) {
       return NextResponse.json({ error: 'Item not found.' }, { status: 404 });
     }
+
+    const item = itemRows[0];
 
     if (item.type === 'text') {
       return new NextResponse(item.text_content || '', {
@@ -64,18 +64,14 @@ export async function GET(
       return NextResponse.json({ error: 'File path not available.' }, { status: 404 });
     }
 
-    // Generate signed URL and redirect
-    const { data: signedData } = await supabaseAdmin.storage
-      .from('transfers')
-      .createSignedUrl(item.file_path, 300, {
-        download: item.file_name || 'download',
-      });
+    // Generate signed download URL and redirect
+    const signedUrl = await createPresignedDownloadUrl(
+      item.file_path,
+      item.file_name || 'download',
+      300
+    );
 
-    if (!signedData?.signedUrl) {
-      return NextResponse.json({ error: 'Failed to generate signed download URL.' }, { status: 500 });
-    }
-
-    return NextResponse.redirect(signedData.signedUrl);
+    return NextResponse.redirect(signedUrl);
   } catch (err: any) {
     console.error('Unhandled error in GET /api/transfers/[key]/item/[itemId]:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

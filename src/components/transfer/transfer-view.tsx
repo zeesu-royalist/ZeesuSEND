@@ -149,15 +149,16 @@ export function TransferView({ transfer }: TransferViewProps) {
             {fileItems.map((item) => (
               <div key={item.id} className="space-y-2">
                 <FilePreview item={item} />
-                <div className="flex justify-end">
+                <div className="w-full flex justify-end">
                   <PillButton
                     variant="dark"
                     size="sm"
                     onClick={() => handleSingleDownload(item)}
                     disabled={isDownloading}
+                    className="w-full sm:w-auto max-w-full gap-2 px-4 py-2.5 overflow-hidden"
                   >
-                    <Download className="w-3.5 h-3.5 mr-1" />
-                    Download {item.file_name}
+                    <Download className="w-4 h-4 shrink-0 text-white" />
+                    <span className="truncate min-w-0">Download {item.file_name}</span>
                   </PillButton>
                 </div>
               </div>
@@ -176,17 +177,17 @@ export function TransferView({ transfer }: TransferViewProps) {
                 size="md"
                 onClick={handleDownloadAll}
                 disabled={isDownloading}
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto max-w-full gap-2 px-5 py-2.5 overflow-hidden"
               >
                 {isDownloading ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin text-[#191314]" />
-                    <span>Preparing Download...</span>
+                    <Loader2 className="w-4 h-4 animate-spin text-[#191314] shrink-0" />
+                    <span className="truncate min-w-0">Preparing Download...</span>
                   </>
                 ) : (
                   <>
-                    <FileArchive className="w-4 h-4 mr-1" />
-                    <span>Download All (.ZIP) ↗</span>
+                    <FileArchive className="w-4 h-4 shrink-0 text-[#191314]" />
+                    <span className="truncate min-w-0">Download All (.ZIP)</span>
                   </>
                 )}
               </PillButton>

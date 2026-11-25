@@ -18,10 +18,10 @@ export function PillButton({
   ...props
 }: PillButtonProps) {
   const baseStyles =
-    'inline-flex items-center justify-center font-bold tracking-tight rounded-full transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer';
+    'inline-flex flex-row items-center justify-center font-bold tracking-tight rounded-full transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer max-w-full select-none';
 
   const sizeStyles = {
-    sm: 'px-4 py-2 text-xs gap-1.5',
+    sm: 'px-4 py-2 text-xs gap-2',
     md: 'px-5 py-2.5 text-sm gap-2',
     lg: 'px-7 py-3.5 text-base gap-2.5',
   };
@@ -42,8 +42,8 @@ export function PillButton({
       className={`${baseStyles} ${sizeStyles[size]} ${variantStyles[variant]} ${className}`}
       {...props}
     >
-      <span>{children}</span>
-      {(showArrow || variant === 'primary') && (
+      {children}
+      {showArrow && (
         <ArrowUpRight className="w-4 h-4 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
       )}
     </button>

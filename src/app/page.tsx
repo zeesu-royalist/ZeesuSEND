@@ -3,8 +3,14 @@ import { MissionSection } from '@/components/landing/mission-section';
 import { FeatureGrid } from '@/components/landing/feature-grid';
 import { SecuritySection } from '@/components/landing/security-section';
 import { FAQSection } from '@/components/landing/faq-section';
+import { purgeExpiredTransfers } from '@/lib/cleanup';
+
+export const dynamic = 'force-dynamic';
 
 export default function HomePage() {
+  // Automatically purge expired transfers in the background when the homepage is loaded
+  purgeExpiredTransfers().catch(() => {});
+
   return (
     <div className="w-full space-y-12 sm:space-y-20 pb-16">
       {/* 1. HERO SECTION (WITH INTEGRATED UPLOAD DROPZONE) */}

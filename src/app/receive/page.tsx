@@ -1,6 +1,9 @@
 import { Suspense } from 'react';
 import { ReceiveForm } from '@/components/receive/receive-form';
 import { Loader2 } from 'lucide-react';
+import { purgeExpiredTransfers } from '@/lib/cleanup';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: 'Receive Transfer | ZeesuSEND',
@@ -8,6 +11,9 @@ export const metadata = {
 };
 
 export default function ReceivePage() {
+  // Automatically purge expired transfers in background when receive page is loaded
+  purgeExpiredTransfers().catch(() => {});
+
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 flex items-center justify-center">
       <Suspense
