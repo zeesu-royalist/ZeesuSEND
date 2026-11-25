@@ -124,7 +124,6 @@ export function HeroSection() {
                     <div className="w-3 h-3 rounded-full bg-green-500/80" />
                   </div>
                   <div className="ml-3 px-3 py-1 rounded-lg bg-white/5 border border-white/10 font-mono text-[11px] text-white/70 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
                     <span>https://zeesusend.app/upload</span>
                   </div>
                 </div>
